@@ -7,6 +7,7 @@ All answers are in Greek and strictly grounded in the ingested documents.
 
 ## ⚙️ Features
 - FastAPI backend with `/chat` endpoint
+- API token authentication via `X-API-Token` header
 - LangChain-powered `ConversationalRetrievalChain` with memory and contextual reranking
 - Embedding model: `intfloat/multilingual-e5-large`
 - Language model: Meltemi 7B Instruct (GGUF) running via `llama-cpp-python`
@@ -41,10 +42,11 @@ All answers are in Greek and strictly grounded in the ingested documents.
    ```bash
    uvicorn app.rag_api:app --reload
    ```
-4. Query it:
+4. Query it (requires an API token):
    ```bash
    curl -X POST http://localhost:8000/chat \
      -H "Content-Type: application/json" \
+     -H "X-API-Token: <your-token>" \
      -d '{"question":"Πώς κάνω εισαγωγή αιτημάτων μαζικά;"}'
    ```
 
@@ -66,3 +68,4 @@ pip install -r requirements.txt
 - Model file is expected at: `~/models/meltemi7b.q4km.gguf`
 - This repo is offline-ready, designed for air-gapped environments
 - All responses are restricted to PDF context only
+- Set `CHATBOT_API_TOKEN` to control the required API token
