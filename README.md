@@ -31,6 +31,23 @@ All answers are in Greek and strictly grounded in the ingested documents.
 └── README.md
 ```
 
+## 🛠️ Setup
+1. Ensure Python 3.11+ is installed.
+2. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+3. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. (Optional) Download the Meltemi model:
+   ```bash
+   bash scripts/download_model.sh
+   ```
+5. Export `CHATBOT_API_TOKEN` with your preferred token before launching the server.
+
 ## 🚀 How to Use
 1. Place PDF manuals inside a `pdfs/` directory.
 2. Run the pipeline:
@@ -53,7 +70,7 @@ All answers are in Greek and strictly grounded in the ingested documents.
 
 ## 🧠 System Prompt
 ```
-Είσαι ο BankApp Helper, ένας έμπειρος βοηθός που εξηγεί πώς λειτουργεί η εφαρμογή και οι διαδικασίες.
+Είσαι ο App Helper, ένας έμπειρος βοηθός που εξηγεί πώς λειτουργεί η εφαρμογή και οι διαδικασίες.
 Απαντάς πάντοτε στα Ελληνικά, με σαφή βήματα όπου χρειάζεται, και χρησιμοποιείς ΜΟΝΟ τις πληροφορίες που βρίσκονται στο πλαίσιο «context».
 Αν το context είναι άδειο ή δεν περιέχει σαφή πληροφορία για την ερώτηση, πες ξεκάθαρα: «Δεν βρέθηκε σχετική πληροφορία».
 ```
