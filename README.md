@@ -1,5 +1,5 @@
 # 🧩 Project Overview
-A private Retrieval-Augmented Generation (RAG) chatbot built for internal use at a bank.
+A private Retrieval-Augmented Generation (RAG) chatbot built for internal use at an enterprise.
 
 **Purpose:** help users understand how internal banking applications work by querying PDF-based manuals.
 
