@@ -1,4 +1,5 @@
 """Chunk JSONL documents for embedding."""
+
 import json
 import sys
 from pathlib import Path
@@ -21,9 +22,10 @@ def main() -> None:
     input_path = Path(sys.argv[1])
     out_path = Path(sys.argv[2])
 
-    with input_path.open("r", encoding="utf-8") as f_in, out_path.open(
-        "w", encoding="utf-8"
-    ) as f_out:
+    with (
+        input_path.open("r", encoding="utf-8") as f_in,
+        out_path.open("w", encoding="utf-8") as f_out,
+    ):
         for line in f_in:
             text = json.loads(line)["text"]
             for chunk in chunk_text(text):
