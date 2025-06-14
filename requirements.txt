@@ -1,7 +1,7 @@
-fastapi
-uvicorn[standard]
-langchain
-chromadb
-llama-cpp-python
-sentence-transformers
-pypdf
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+langchain==0.1.16
+chromadb==0.4.24
+llama-cpp-python==0.2.11
+sentence-transformers==2.2.2
+pypdf==3.17.1

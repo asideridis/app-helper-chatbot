@@ -8,11 +8,12 @@ All answers are in Greek and strictly grounded in the ingested documents.
 ## ⚙️ Features
 - FastAPI backend with `/chat` endpoint
 - API token authentication via `X-API-Token` header
-- LangChain-powered `ConversationalRetrievalChain` with memory and contextual reranking
+- Basic in-memory rate limiting
+- Simple retrieval from ChromaDB using sentence-transformer embeddings
 - Embedding model: `intfloat/multilingual-e5-large`
 - Language model: Meltemi 7B Instruct (GGUF) running via `llama-cpp-python`
 - Vector store: ChromaDB (local, persisted)
-- Chunked PDF ingestion pipeline and contextual reranking with `EmbeddingsFilter`
+- Chunked PDF ingestion pipeline
 - Greek-only responses with zero tolerance for hallucination
 
 ## 🧪 Project Structure
@@ -69,3 +70,4 @@ pip install -r requirements.txt
 - This repo is offline-ready, designed for air-gapped environments
 - All responses are restricted to PDF context only
 - Set `CHATBOT_API_TOKEN` to control the required API token
+- Licensed under the MIT License
