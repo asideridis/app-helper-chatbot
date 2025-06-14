@@ -1,7 +1,7 @@
 # 🧩 Project Overview
 A private Retrieval-Augmented Generation (RAG) chatbot built for internal use at an enterprise.
 
-**Purpose:** help users understand how internal banking applications work by querying PDF-based manuals.
+**Purpose:** help users understand how internal applications work by querying PDF-based manuals.
 
 All answers are in Greek and strictly grounded in the ingested documents.
 
