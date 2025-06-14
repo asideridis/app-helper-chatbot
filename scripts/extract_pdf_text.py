@@ -1,4 +1,5 @@
 """Extract text from a PDF file and output to JSONL."""
+
 import json
 import sys
 from pathlib import Path

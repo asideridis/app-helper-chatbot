@@ -66,3 +66,6 @@ pip install -r requirements.txt
 - Model file is expected at: `~/models/meltemi7b.q4km.gguf`
 - This repo is offline-ready, designed for air-gapped environments
 - All responses are restricted to PDF context only
+
+## License
+This project is licensed under the [MIT License](LICENSE).

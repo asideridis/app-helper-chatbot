@@ -1,4 +1,5 @@
 """Load chunks into ChromaDB."""
+
 import json
 import sys
 from pathlib import Path
