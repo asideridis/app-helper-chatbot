@@ -1,5 +1,7 @@
 """Chunk JSONL documents for embedding."""
+
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -21,14 +23,26 @@ def main() -> None:
     input_path = Path(sys.argv[1])
     out_path = Path(sys.argv[2])
 
-    with input_path.open("r", encoding="utf-8") as f_in, out_path.open(
-        "w", encoding="utf-8"
-    ) as f_out:
-        for line in f_in:
-            text = json.loads(line)["text"]
-            for chunk in chunk_text(text):
-                json.dump({"text": chunk}, f_out, ensure_ascii=False)
-                f_out.write("\n")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+    logging.info("Chunking %s", input_path)
+
+    try:
+        with (
+            input_path.open("r", encoding="utf-8") as f_in,
+            out_path.open("w", encoding="utf-8") as f_out,
+        ):
+            for line in f_in:
+                try:
+                    text = json.loads(line)["text"]
+                except Exception as exc:
+                    logging.error("Invalid JSON line: %s", exc)
+                    continue
+                for chunk in chunk_text(text):
+                    json.dump({"text": chunk}, f_out, ensure_ascii=False)
+                    f_out.write("\n")
+    except Exception:
+        logging.exception("Chunking failed")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
