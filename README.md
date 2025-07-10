@@ -1,14 +1,19 @@
 # App Helper Chatbot
 
-A multilingual RAG service that replies only in Greek. It supports many
-applications, each stored in its own Chroma collection.
+A retrieval augmented generation service built with FastAPI, Chroma
+and `llama-cpp-python`. The API can host many applications, each using
+its own document collection. Answers are returned in Greek unless the
+question is in English.
 
 ## Quick start
 
-```bash
-make compose-up      # start api, chromadb and ollama
-make dev             # run the API with autoreload on localhost:8080
-```
+1. Copy `.env.example` to `.env` and adjust paths if needed.
+2. Run:
+
+   ```bash
+   make compose-up      # start Chroma, Ollama and the API
+   make dev             # run the API with autoreload on localhost:8080
+   ```
 
 ### Ingest documents
 
@@ -22,10 +27,11 @@ python scripts/ingest.py --app-id my_app \
 ```bash
 curl -X POST http://localhost:8080/chat/my_app \
   -H 'Content-Type: application/json' \
+  -H 'X-API-Token: secret-token' \
   -d '{"question": "Τί είναι ERP;"}'
 ```
 
-The JSON response includes `answer` and `citations`.
+The response includes an `answer` field and a list of `citations`.
 
 ## Environment variables
 
@@ -41,6 +47,7 @@ Copy `.env.example` to `.env` and edit as needed.
 ## How to run tests
 
 ```bash
+pip install -r requirements.txt
 make test
 ```
 
