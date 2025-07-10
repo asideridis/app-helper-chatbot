@@ -1,0 +1,27 @@
+version: "3"
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    command: bash -c "ollama pull ilsp/meltemi-7b-instruct:q4_k_m && ollama serve"
+    ports:
+      - "11434:11434"
+  api:
+    build: .
+    environment:
+      - MODEL_NAME=/root/.ollama/models/ilsp/meltemi-7b-instruct-q4_k_m
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - EMBEDDING_MODEL=intfloat/multilingual-e5-large
+    ports:
+      - "8080:8080"
+    depends_on:
+      - chromadb
+      - ollama
+volumes:
+  ollama:

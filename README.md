@@ -1,90 +1,101 @@
-# 🧩 Project Overview
-A private Retrieval-Augmented Generation (RAG) chatbot built for internal use at an enterprise.
+# App Helper Chatbot
 
-**Purpose:** help users understand how internal applications work by querying PDF-based manuals.
+A retrieval augmented generation (RAG) service that stores documentation per application and answers questions in Greek. The API uses FastAPI, ChromaDB and `llama-cpp-python` via Ollama.
 
-All answers are in Greek and strictly grounded in the ingested documents.
+## Tech stack
 
-## ⚙️ Features
-- FastAPI backend with `/chat` endpoint
-- API token authentication via `X-API-Token` header
-- Basic in-memory rate limiting
-- Simple retrieval from ChromaDB using sentence-transformer embeddings
-- Embedding model: `intfloat/multilingual-e5-large`
-- Language model: Meltemi 7B Instruct (GGUF) running via `llama-cpp-python`
-- Vector store: ChromaDB (local, persisted)
-- Chunked PDF ingestion pipeline
-- Greek-only responses with zero tolerance for hallucination
+- **FastAPI** – web framework
+- **ChromaDB** – vector store
+- **llama-cpp-python** – local LLM backend
+- **SentenceTransformers** – embeddings
+- **Docker Compose** – development setup
 
-## 🧪 Project Structure
-```
-.
-├── app/
-│   └── rag_api.py            # FastAPI app with RAG chain
-├── scripts/
-│   ├── extract_pdf_text.py   # Extracts Greek text from PDFs
-│   ├── chunk_jsonl.py        # Splits long text into overlapping chunks
-│   ├── ingest.py             # Embeds and loads chunks into ChromaDB
-│   └── download_model.sh     # Downloads Meltemi 7B GGUF model
-├── requirements.txt
-├── pyproject.toml
-└── README.md
+## Clone and install
+
+```bash
+git clone https://github.com/asideridis/app-helper-chatbot.git
+cd app-helper-chatbot
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
 ```
 
-## 🛠️ Setup
-1. Ensure Python 3.11+ is installed.
-2. Create and activate a virtual environment:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-3. Install the dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. (Optional) Download the Meltemi model:
-   ```bash
-   bash scripts/download_model.sh
-   ```
-5. Export `CHATBOT_API_TOKEN` with your preferred token before launching the server.
+## Running with Docker Compose
 
-## 🚀 How to Use
-1. Place PDF manuals inside a `pdfs/` directory.
-2. Run the pipeline:
-   ```bash
-   python scripts/extract_pdf_text.py pdfs/ output.jsonl
-   python scripts/chunk_jsonl.py output.jsonl chunks.jsonl
-   python scripts/ingest.py chunks.jsonl
-   ```
-3. Start the FastAPI server:
-   ```bash
-   uvicorn app.rag_api:app --reload
-   ```
-4. Query it (requires an API token):
-   ```bash
-   curl -X POST http://localhost:8000/chat \
-     -H "Content-Type: application/json" \
-     -H "X-API-Token: <your-token>" \
-     -d '{"question":"Πώς κάνω εισαγωγή αιτημάτων μαζικά;"}'
-   ```
+Start Chroma, Ollama and the API:
 
-## 🧠 System Prompt
-```
-Είσαι ο App Helper, ένας έμπειρος βοηθός που εξηγεί πώς λειτουργεί η εφαρμογή και οι διαδικασίες.
-Απαντάς πάντοτε στα Ελληνικά, με σαφή βήματα όπου χρειάζεται, και χρησιμοποιείς ΜΟΝΟ τις πληροφορίες που βρίσκονται στο πλαίσιο «context».
-Αν το context είναι άδειο ή δεν περιέχει σαφή πληροφορία για την ερώτηση, πες ξεκάθαρα: «Δεν βρέθηκε σχετική πληροφορία».
+```bash
+make compose-up
+make dev
 ```
 
-## 📦 Dependencies
-See `requirements.txt` and `pyproject.toml`. Install with:
+The API listens on `http://localhost:8080`.
+
+## Ingest documents
+
+Split PDF files into chunks and store them by application id:
+
+```bash
+python scripts/ingest.py --app-id my_app \
+  --path docs/manual.pdf --chunk-size 400 --overlap 50
+```
+
+## Query the API
+
+```bash
+curl -X POST http://localhost:8080/chat/my_app \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Token: secret-token' \
+  -d '{"question": "Τί είναι ERP;"}'
+```
+
+The JSON response contains an `answer` and `citations` array.
+
+## Running with systemd
+
+Create `/etc/systemd/system/app-helper.service`:
+
+```ini
+[Unit]
+Description=App Helper Chatbot API
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/app-helper-chatbot
+ExecStart=/usr/local/bin/uvicorn app.rag_api:app --host 0.0.0.0 --port 8080
+Restart=always
+EnvironmentFile=/opt/app-helper-chatbot/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Reload systemd and start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now app-helper.service
+```
+
+## Environment variables
+
+| Name              | Purpose                                  |
+|-------------------|-------------------------------------------|
+| `MODEL_NAME`      | Path to GGUF model for `llama-cpp-python` |
+| `CHROMA_HOST`     | ChromaDB host                             |
+| `CHROMA_PORT`     | ChromaDB port                             |
+| `EMBEDDING_MODEL` | SentenceTransformer model name            |
+
+Copy `.env.example` to `.env` and adjust as needed.
+
+## How to run tests
+
 ```bash
 pip install -r requirements.txt
+make test
 ```
 
-## ⚠️ Notes
-- Vector DB is stored at: `~/chatbot/chroma`
-- Model file is expected at: `~/models/meltemi7b.q4km.gguf`
-- This repo is offline-ready, designed for air-gapped environments
-- All responses are restricted to PDF context only
-- Set `CHATBOT_API_TOKEN` to control the required API token
-- Licensed under the MIT License
+## License
+
+MIT
