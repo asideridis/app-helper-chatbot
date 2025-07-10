@@ -5,3 +5,4 @@ chromadb==0.4.24
 llama-cpp-python==0.2.11
 sentence-transformers==2.2.2
 pypdf==3.17.1
+pydantic-settings==2.2.1
