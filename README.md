@@ -1,16 +1,19 @@
 # App Helper Chatbot
 
-A retrieval augmented generation (RAG) service that stores documentation per application and answers questions in Greek. The API uses FastAPI, ChromaDB and `llama-cpp-python` via Ollama.
+A retrieval-augmented generation (RAG) service that answers **only in Greek**.  
+It stores documentation per application (separate Chroma collections) and lets users ask questions through a simple FastAPI endpoint.
 
 ## Tech stack
 
-- **FastAPI** – web framework
-- **ChromaDB** – vector store
-- **llama-cpp-python** – local LLM backend
-- **SentenceTransformers** – embeddings
-- **Docker Compose** – development setup
+| Purpose              | Component                    |
+|----------------------|------------------------------|
+| Web API              | FastAPI                      |
+| Vector store         | ChromaDB                     |
+| Local LLM backend    | `llama-cpp-python` via Ollama |
+| Embeddings           | SentenceTransformers         |
+| Container workflow   | Docker Compose               |
 
-## Clone and install
+## Clone & install
 
 ```bash
 git clone https://github.com/asideridis/app-helper-chatbot.git
@@ -18,45 +21,54 @@ cd app-helper-chatbot
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+cp .env.example .env   # then edit as needed
 ```
 
-## Running with Docker Compose
-
-Start Chroma, Ollama and the API:
+## Running with Docker Compose (dev)
 
 ```bash
-make compose-up
-make dev
+make compose-up   # starts Chroma, Ollama, and the API
+make dev          # FastAPI with autoreload on http://localhost:8080
 ```
 
-The API listens on `http://localhost:8080`.
+---
 
-## Ingest documents
+## Ingesting documents
 
-Split PDF files into chunks and store them by application id:
+Split a PDF into chunks and load it for a specific application:
 
 ```bash
-python scripts/ingest.py --app-id my_app \
-  --path docs/manual.pdf --chunk-size 400 --overlap 50
+python scripts/ingest.py   --app-id my_app   --path docs/manual.pdf   --chunk-size 400   --overlap 50
 ```
 
-## Query the API
+Each `app_id` gets its own Chroma collection (`app_my_app`, `app_hr`, etc.).
+
+## Querying the API
 
 ```bash
-curl -X POST http://localhost:8080/chat/my_app \
-  -H 'Content-Type: application/json' \
-  -H 'X-API-Token: secret-token' \
-  -d '{"question": "Τί είναι ERP;"}'
+curl -X POST http://localhost:8080/chat/my_app   -H "Content-Type: application/json"   -H "X-API-Token: secret-token"   -d '{"question": "Τί είναι ERP;"}'
 ```
 
-The JSON response contains an `answer` and `citations` array.
+Response:
 
-## Running with systemd
+```json
+{
+  "answer": "…",
+  "citations": [
+    {
+      "page": 12,
+      "file": "manual.pdf"
+    }
+  ]
+}
+```
 
-Create `/etc/systemd/system/app-helper.service`:
+---
+
+## Deploying with systemd (optional)
 
 ```ini
+# /etc/systemd/system/app-helper.service
 [Unit]
 Description=App Helper Chatbot API
 After=network.target
@@ -71,30 +83,32 @@ EnvironmentFile=/opt/app-helper-chatbot/.env
 WantedBy=multi-user.target
 ```
 
-Reload systemd and start the service:
-
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now app-helper.service
 ```
 
+---
+
 ## Environment variables
 
-| Name              | Purpose                                  |
-|-------------------|-------------------------------------------|
-| `MODEL_NAME`      | Path to GGUF model for `llama-cpp-python` |
-| `CHROMA_HOST`     | ChromaDB host                             |
-| `CHROMA_PORT`     | ChromaDB port                             |
-| `EMBEDDING_MODEL` | SentenceTransformer model name            |
+| Variable            | Purpose                                   |
+|---------------------|-------------------------------------------|
+| `MODEL_NAME`        | Path or tag of the GGUF model             |
+| `CHROMA_HOST`       | ChromaDB host (default: `localhost`)      |
+| `CHROMA_PORT`       | ChromaDB port (default: `8000`)           |
+| `EMBEDDING_MODEL`   | SentenceTransformer model name            |
+| `CHATBOT_API_TOKEN` | Static API token expected by the server   |
 
-Copy `.env.example` to `.env` and adjust as needed.
+---
 
-## How to run tests
+## Tests
 
 ```bash
-pip install -r requirements.txt
 make test
 ```
+
+---
 
 ## License
 
